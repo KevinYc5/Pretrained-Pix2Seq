@@ -14,6 +14,11 @@ pip install -U 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=Pyth
 
 That's it, should be good to train and evaluate detection models.
 
+kevin's
+``` 
+pip install timm
+```
+
 ## Data preparation
 
 Download and extract COCO 2017 train and val images with annotations from
@@ -31,8 +36,30 @@ path/to/coco/
 First link coco dataset to the project folder
 ```
 ln -s /path/to/coco ./coco 
+
+# kevin's
+
+mkdir ./coco
+ln -s /path/to/train2014 ./coco/train2014
+ln -s /path/to/val2014 ./coco/val2014
+ln -s /path/to/annotions ./coco/annotations
+
 ```
 
+## Image_encoder
+
+download ckpt [weight](https://drive.google.com/file/d/1b7KzqnEBIQCTKmk9SqsXNqX2nlTZSFV_/view?usp=sharing)
+
+```
+# kevin's
+
+# train dataset encode
+sh train.sh --model pix2seq --resume ./ckpt/checkpoint_e299_ap370.pth --encode_train ./feature/train --batch_size 1
+
+# val dataset encode
+sh train.sh --model pix2seq --resume ./ckpt/checkpoint_e299_ap370.pth --encode_val ./feature/val --batch_size 1
+
+```
 Training
 ```
 sh train.sh --model pix2seq --output_dir /path/to/save

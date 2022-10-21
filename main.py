@@ -5,7 +5,7 @@ import json
 import random
 import time
 from pathlib import Path
-
+import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, DistributedSampler
@@ -14,6 +14,7 @@ import datasets
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
+from encode import encode
 # from models import build_model
 from playground import build_all_model
 from timm.utils import NativeScaler
@@ -82,7 +83,11 @@ def get_args_parser():
     parser.add_argument('--resume', default='', help='resume from checkpoint')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
-    parser.add_argument('--eval', action='store_true')
+    parser.add_argument('--eval', default='',
+                        help='path where to save feature, empty for no saving')
+    parser.add_argument('--encode_val', default='',
+                        help='path where to save feature, empty for no saving')
+    parser.add_argument('--encode_train', action='store_true')
     parser.add_argument('--num_workers', default=2, type=int)
 
     # distributed training parameters
@@ -113,7 +118,8 @@ def main(args):
         model_without_ddp = model.module
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print('number of params:', n_parameters)
-
+    n_parameters = sum(p.numel() for p in model.module.backbone.parameters() if p.requires_grad)
+    print('number of encoder params:', n_parameters)
     param_dicts = [
         {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
         {
@@ -177,6 +183,12 @@ def main(args):
             cur_ap = checkpoint['ap']
             max_ap = checkpoint['max_ap']
 
+    if args.encode_train:
+        encode(model, data_loader_train, device, args.encode_train)
+        return 
+    if args.encode_val:
+        encode(model, data_loader_val, device, args.encode_val)
+        return     
     if args.eval:
         test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
                                               data_loader_val, base_ds, device, args.output_dir)

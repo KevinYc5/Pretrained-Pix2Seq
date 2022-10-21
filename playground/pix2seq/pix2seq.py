@@ -35,6 +35,20 @@ class Pix2Seq(nn.Module):
             nn.GroupNorm(32, hidden_dim))
         self.backbone = backbone
 
+    def encoder(self, samples):
+        image_tensor, targets = samples[0], samples[1]
+        if isinstance(image_tensor, (list, torch.Tensor)):
+            image_tensor = nested_tensor_from_tensor_list(image_tensor) # torch.Size([1, 3, 996, 1333])
+        features, pos = self.backbone(image_tensor)
+
+        src, mask = features[-1].decompose()
+        assert mask is not None
+        mask = torch.zeros_like(mask).bool()
+
+        src = self.input_proj(src)
+
+        return src, mask, targets, pos[-1]
+
     def forward(self, samples):
         """ 
             samples[0]:
