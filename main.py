@@ -87,7 +87,8 @@ def get_args_parser():
                         help='path where to save feature, empty for no saving')
     parser.add_argument('--encode_val', default='',
                         help='path where to save feature, empty for no saving')
-    parser.add_argument('--encode_train', action='store_true')
+    parser.add_argument('--encode_train', default='',
+                        help='path where to save feature, empty for no saving')
     parser.add_argument('--num_workers', default=2, type=int)
 
     # distributed training parameters

@@ -28,6 +28,7 @@ def encode(model, data_loader, device, output_dir):
     # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
     i = 0
     for samples, targets in tqdm(data_loader):
+
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
@@ -42,6 +43,7 @@ def encode(model, data_loader, device, output_dir):
         feature_np = src[0].cpu().numpy()
         _output = os.path.join(output_dir,"{idx}.npy".format(idx=i))
         np.save(_output, feature_np)
+        # print(image_id)
         # sys.exit()
         i = i+1
 
